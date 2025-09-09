@@ -1,0 +1,104 @@
+Sending OTP
+   signUp OTP
+   fill data + create account click -> verify email here OTP came
+   before sending the OTp we need to perform validation to check if the user aleardy xits
+   OTP gnerated must be unique
+   save it into the DB so that u can match when user insert the OTp on UI
+
+SignUP flow
+    get the user
+    perform normal validation of data
+    send otp for email verifcation
+    if procceds, hash Password
+
+   sendOtp -> otpCreated for email -> saved into DB
+   SignUp form-> takes all data + otp  (sendOTp function call) on next page and getsstored in request URL and verfied with the OTp stored in the DB
+
+Login Flow 
+    get data from user
+    validate the data
+    check if user exits
+    Gnertae the JWT , after passwrd matching
+    create cookie and send the response    
+
+Reset Password function
+   token , password, confirm password
+   get the user using token that is why entered
+   if no entry then invalid token
+   token time check
+   hash the password
+   Update the password
+
+Course Flow 
+   one course is made up from section -> subsection
+    changed : tags can only made Admin -> via using MiddleWare -> MiddleWare isAdmin to be used
+       Now Admin will Create the Category instead of Tag
+   How is course Content made
+      Section-> Python
+      subsection will include the timing of each video-> what is the content at each minute delevierded 
+
+Course Creation 
+   fill the information about the course
+   provide the course tags while Creation
+   course always include the tags,
+   CRUD operation is always being performed in every controller
+   choose a tag -> course creates karne se phele tag available hone chaiye
+   choose a category -> course creates krne se phele category of course availble hone chaiye
+   each subsection contains a videos
+
+Create Tag API
+   fetched name,description from the req body
+   perform validation
+   store it into the database
+
+Get all tag API
+   
+
+When u try to fetch course
+   it means u are already loggedIn
+   so in request URL u have aleardy inserted the user in the Request body see it in the MiddleWare
+
+
+Section Flow Logic Formulation
+   fetch the data from the request body
+   perform the dataValidation
+   create Section
+   Update the course model with object ID of section
+   send the successful resoponse
+
+subsection
+   fetch all the data from the request body
+   video will get from file -> string insert
+   validation if all the field are present or not
+   in Subsection we are storing the video URL as string... 
+   so first we would be required to uplad it to the cloudinary
+   Create the Subsection
+   Insert the Sbsection into the Section model
+
+Profile Controller 
+   In signUp controller, we have created the Profile Object with all the values as NULL
+   now since the entry is already in the DB of profile Schema, now we just need to update it 
+   // so we do not need to create the Profile schema in its Controller as it has been already be created at all
+
+In web development, a cron job is basically a scheduled task that runs automatically at a specific time or interval on a server.
+
+      Think of it as an alarm clock for your server that tells it:
+      “Run this script at 2:00 AM every day” or
+      “Check this every 5 minutes.”
+            🔹 Where It’s Used in Web Development
+            In real projects, cron jobs are very common. For example:
+
+            Database Maintenance → Automatically back up your database every night at 12 AM.
+
+            Email Notifications → Send reminder emails to users daily at 9 AM.
+
+            Cache Clearing → Clean old cache files every week.
+
+            Report Generation → Generate daily/weekly/monthly reports.
+
+            Payment Systems → Retry failed payments or process subscriptions at scheduled times.
+
+            Data Sync → Fetch or update data from an external API every hour.
+
+
+Payment Integration Of RazorPay
