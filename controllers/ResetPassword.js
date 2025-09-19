@@ -2,8 +2,8 @@ const User = require("../models/User")
 const mailSender = require("../utils/mailSender")
 
 // resetPasswordToken
-// gnerates the link and mail it to the user for verification 
-exports.resetPasswordToken = async (req,res)=>{
+// generates the link and mails it to the user for verification
+exports.resetPasswordToken = async (req, res) => {
     try{
         // get email from the request body
         const {email} = req.body;
@@ -16,22 +16,22 @@ exports.resetPasswordToken = async (req,res)=>{
             })
         }
 
-        // generate the token,also we need to set the expiration time
-        const token = crypto.randomUUID(); // randomy genrated
+    // generate the token, also we need to set the expiration time
+    const token = crypto.randomUUID(); // randomly generated
 
-        // Update the User by adding the token and exprirating time
+        // Update the User by adding the token and expiring time
         const updatedDetails = await User.findOneAndUpdate(
-                                    {email:email},
-                                    {
-                                        token:token,
-                                        resetPasswordExpires:Date.now + 5*60*1000,
-                                    },
-                                    {new:true}
+            { email: email },
+            {
+                token: token,
+                resetPasswordExpires: Date.now() + 5 * 60 * 1000,
+            },
+            { new: true }
         );
 
-        // generating the link
-                // this token will help u to get the differnt differnt URL for reseting the password
-        const url = `htttp://localhost:3000/update-password/${token}`;
+    // generating the link
+    // this token will help you to get the different URL for resetting the password
+    const url = `http://localhost:3000/update-password/${token}`;
 
         // send the email
         await mailSender(email,"Password Reset Link",`Password reset Link : ${url}`);

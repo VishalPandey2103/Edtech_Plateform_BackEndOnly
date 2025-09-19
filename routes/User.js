@@ -8,7 +8,7 @@ const { resetPassword, resetPasswordToken } = require("../controllers/ResetPassw
 const { auth } = require("../middleware/auth");
 
 // Send OTP
-router.post("/sendotp", sendOTP);
+router.post("/sendOTP", sendOTP);
 
 // Sign Up
 router.post("/signup", signUp);

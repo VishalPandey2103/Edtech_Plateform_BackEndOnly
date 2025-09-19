@@ -2,12 +2,12 @@ const { instance } = require("../config/razorpay");
 const Course = require("../models/Course");
 const User = require("../models/User");
 const mailSender = require("../utils/mailSender");
-const { courseEnrollmentEmail } = require("../mail/templates/courseEnrollmentEmail");
+const { courseEnrollmentEmail } = require("../mail/template/courseEnrollermentTemplate");
 const { mongo, default: mongoose } = require("mongoose");
 const crypto = require('crypto');
 
 
-// capture the payment and initate the RazorpPay order
+// capture the payment and initiate the Razorpay order
 exports.capturePayment = async (req, res) => {
     try {
         // get the courseId and userId
@@ -36,7 +36,7 @@ exports.capturePayment = async (req, res) => {
             // get the ObjectId from the UserId
             const uid = new mongoose.Types.ObjectId(userId);
 
-            if (courses.studentsEnrolled.includes(uid)) {
+            if (course.studentsEnrolled.includes(uid)) {
                 return res.status(409).json({
                     success: false,
                     message: "You have already bought the course"
@@ -129,37 +129,48 @@ exports.verifySignature = async (req, res) => {
         // during payment initaition we have send the notes which has courseId,userID
         const { userId, courseId } = req.body.payload.payment.entity.notes;
 
-        // find the course and Enrolleed the student in it
-        const EnrolledCourse = await Course.findByIdAndUpdate(courseId, {
+        // find the course and enroll the student in it
+        const enrolledCourse = await Course.findByIdAndUpdate(courseId, {
             $push: { studentsEnrolled: userId },
         }, { new: true });
 
-        if (!EnrolledCourse) {
+        if (!enrolledCourse) {
             return res.status(500).json({
                 success: false,
                 message: "Course not found"
-            })
+            });
         }
 
-        console.log(EnrolledCourse)
+        console.log(enrolledCourse);
 
-        // find the student and add the course into the list of enroller courses
+        // find the student and add the course into the list of enrolled courses
         const enrolledStudent = await User.findOneAndUpdate({ _id: userId }, {
             $push: { enrolledCourses: courseId }
-        })
+        }, { new: true });
 
-        // mail send  kardo for confirmation
-        const emailResponse = await mailSender(enrolledStudent.email,
-             "Congratulations from CourseBundler",
-             "Congratulations, you are onboarded into the New Course"
-            //   courseEnrollmentEmail(enrolledStudent.name, EnrolledCourse.name)
-            );
+        if (!enrolledStudent) {
+            return res.status(500).json({
+                success: false,
+                message: "User not found"
+            });
+        }
 
-            console.log(emailResponse);
-            return res.status(200).json({
-                success: true,
-                message: "Payment verified and course added to the user account"
-            }); 
+        // Send confirmation email using the template
+        const emailBody = courseEnrollmentEmail(
+            enrolledStudent.firstName || "User",
+            enrolledCourse.courseName || "the course"
+        );
+        const emailResponse = await mailSender(
+            enrolledStudent.email,
+            "Congratulations from CourseBundler",
+            emailBody
+        );
+
+        console.log(emailResponse);
+        return res.status(200).json({
+            success: true,
+            message: "Payment verified and course added to the user account"
+        });
 
     } catch (error) {
         console.log(error);

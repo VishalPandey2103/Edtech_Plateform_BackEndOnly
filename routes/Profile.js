@@ -5,18 +5,18 @@ const { deleteAccount, updateProfile, getAllUserDetails, getEnrolledCourses, upd
 const { auth } = require("../middleware/auth");
 
 // Update Profile
-router.put("/update-profile", auth, updateProfile);
+router.put("/updateProfile", auth, updateProfile);
 
 // Delete Account
-router.delete("/delete-account", auth, deleteAccount);
+router.delete("/deleteProfile", auth, deleteAccount);
 
 // Get All User Details
-router.get("/user-details", auth, getAllUserDetails);
+router.get("/getUserDetails", auth, getAllUserDetails);
 
 // Get Enrolled Courses
-router.get("/enrolled-courses", auth, getEnrolledCourses);
+router.get("/getEnrolledCourses", auth, getEnrolledCourses);
 
 // Update Display Picture
-router.put("/update-display-picture", auth, updateDisplayPicture);
+router.put("/updateDisplayPicture", auth, updateDisplayPicture);
 
 module.exports = router;

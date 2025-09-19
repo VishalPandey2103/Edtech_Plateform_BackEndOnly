@@ -1,11 +1,10 @@
-const RatingAndRevie = require("../models/RatingAndReview");
-const Course = require("../models/Course");
 const RatingAndReview = require("../models/RatingAndReview");
+const Course = require("../models/Course");
 
 exports.createRatingAndReview = async (req, res) => {
     try {
-        const { courseId, rating, review } = req.body;
-        const userId = req.user.userId; // attached during athourization
+    const { courseId, rating, review } = req.body;
+    const userId = req.user.id;
 
         // Validate input
         if (!courseId || !rating || !review) {
@@ -16,9 +15,9 @@ exports.createRatingAndReview = async (req, res) => {
         }
 
         // Check if course exists and the user also enrolled in it
-        const course = await Course.findById({
+        const course = await Course.findOne({
             _id: courseId,
-            StudentEnrolled: { $eq: userId }
+            studentsEnrolled: { $eq: userId }
         });
 
         if (!course) {
@@ -30,12 +29,12 @@ exports.createRatingAndReview = async (req, res) => {
 
 
         // check if the user already reviwed or not
-        const alreadyReviewd = await RatingAndReview.findOne(
+        const alreadyReviewed = await RatingAndReview.findOne(
             { user: userId, course: courseId }
-        )
+        );
 
         // if the user already created by the user , then no need to recreate it
-        if (alreadyReviewd) {
+        if (alreadyReviewed) {
             return res.status(400).json({
                 success: false,
                 message: "You have already reviewed this course"

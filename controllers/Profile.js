@@ -1,7 +1,7 @@
 const Profile = require("../models/Profile");
 const User = require("../models/User");
 const Course = require("../models/Course");
-// to sechdule the deletion of user account
+// to schedule the deletion of user account
 const schedule = require("node-schedule");
 
 exports.updateProfile = async (req, res) => {
@@ -11,8 +11,8 @@ exports.updateProfile = async (req, res) => {
     // contactNumber and gender are not optional
     const { dateOfBirth = "", about = "", contactNumber, gender } = req.body;
 
-    // ge the userId from the request URl
-    const userId = req.userId;
+  // get the userId from the request URL
+  const userId = req.user.id;
 
     // validate if all the required fields are present or not
     if (!contactNumber || !gender || !userId) {
@@ -33,16 +33,13 @@ exports.updateProfile = async (req, res) => {
 
     const profileID = userDetails.additionalDetails;
 
-    // find the profile
-    const profileDetails = await Profile.find({
-      _id: profileID
-    })
 
+    // find the profile as an object
+    const profileDetails = await Profile.findById(profileID);
     profileDetails.dateOfBirth = dateOfBirth;
     profileDetails.about = about;
     profileDetails.contactNumber = contactNumber;
     profileDetails.gender = gender;
-
     await profileDetails.save();
 
     return res.status(200).json({
@@ -134,30 +131,91 @@ exports.getAllUserDetails = async (req, res) => {
   }
 };
 
-// route handler that will return the courses enroller to the user
+
+// route handler that will return the courses enrolled by the user
 exports.getEnrolledCourses = async (req, res) => {
   try {
+    const userId = req.user.id; // use req.user.id
 
-    const userId = req.userId;
-
-    const userDetails = await User.findById({userId});
-
-    if(!userDetails){
-      return res.status(404).json({
-        success:false,
-        message:"Please Send the Valid User ID"
+    const userDetails = await User.findById(userId)
+      .populate({
+        path: "courses",
+        populate: {
+          path: "instructor",
+          select: "firstName lastName email",
+        },
       })
+      .exec();
+
+    if (!userDetails) {
+      return res.status(404).json({
+        success: false,
+        message: "Please send a valid User ID",
+      });
     }
 
-    // from this userID get the Courses Enrolleed
-    const courses = userDetails.cou
-
+    // Return empty array if no courses
+    return res.status(200).json({
+      success: true,
+      data: userDetails.courses || [],
+    });
   } catch (error) {
-    console.log(error);
-    return res.status.json({
-      success:false,
-      message:"Error while Trying to fetch all Enrolled Courses",
-    })
-
+    console.error("Error while trying to fetch enrolled courses:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error while trying to fetch enrolled courses",
+      error: error.message,
+    });
   }
-}
+};
+
+exports.updateDisplayPicture = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const image = req.files?.profileimage;
+
+    if (!userId || !image) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide user ID and profile image",
+      });
+    }
+
+    // Upload image to Cloudinary
+    const profileImage = await uploadImageToCloudinary(
+      image,
+      process.env.FOLDER_NAME
+    );
+
+    if (!profileImage || !profileImage.secure_url) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to upload image",
+      });
+    }
+
+    // Find and update user
+    const userDetails = await User.findById(userId);
+    if (!userDetails) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    userDetails.image = profileImage.secure_url;
+    await userDetails.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "User profile picture updated successfully",
+      imageUrl: userDetails.image,
+    });
+  } catch (error) {
+    console.error("Error updating profile picture:", error);
+    return res.status(500).json({
+      success: false,
+      message: `Error while updating profile picture: ${error.message}`,
+    });
+  }
+};

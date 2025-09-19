@@ -52,30 +52,33 @@ exports.createSection = async (req,res) =>{
 
 exports.updateSection = async (req,res) =>{
     try{
-        // fetch all the data from the request URL
-        const{sectionName,sectionID} = req.body;
 
-        //validate if al the fields are present or not
-        if(!sectionName || sectionID){
+        // fetch all the data from the request body
+        const { sectionName, sectionID } = req.body;
+
+        // validate if all the fields are present or not
+        if (!sectionName || !sectionID) {
             return res.status(400).json({
-                success:false,
-                message:"All fields are required"
-            })
+                success: false,
+                message: "All fields are required"
+            });
         }
 
         // update the section
-        const updatedSection = await Section.findByIdAndUpdate({sectionId},{
-            sectionName:sectionName,
-        })
+        const updatedSection = await Section.findByIdAndUpdate(
+            sectionID,
+            { sectionName: sectionName },
+            { new: true }
+        );
 
-        // there is no requirement to update the Course Sechma as ID is still same
+        // there is no requirement to update the Course Schema as ID is still same
 
-        // return the respnse
+        // return the response
         return res.status(200).json({
-            success:true,
-            message:"Section updated successfully",
-            data:updatedSection,
-        })
+            success: true,
+            message: "Section updated successfully",
+            data: updatedSection,
+        });
 
     }catch(error){
         console.log(error);

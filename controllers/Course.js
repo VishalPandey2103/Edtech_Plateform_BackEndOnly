@@ -1,12 +1,12 @@
-const Tags = require("../models/Category");
-const Course = require("../models/Course")
-const User = require("../models/User")
-const { uploadImageToCloudinary } = require("../utils/imageUploader")
+const Category = require("../models/Category");
+const Course = require("../models/Course");
+const User = require("../models/User");
+const { uploadImageTocloudinary } = require("../utils/imageUploader");
 require("dotenv").config();
 
-// when we reach the courseroute we see there is option to uplaod to file,
-// so we will be uplading it to the Cloudinary so that we can access it later
-// so create the fucntion to uplaod it cloiundary
+// when we reach the course route we see there is option to upload a file,
+// so we will be uploading it to Cloudinary so that we can access it later
+// so create the function to upload it to cloudinary
 
 
 // create the course
@@ -17,7 +17,7 @@ exports.createCourse = async (req, res) => {
         // here tag is the ID sent in the Request URL
         const { courseName, courseDescription, whatYouWillLearn, tag } = req.body;
         // get the image(thumbnail) from the request
-        const thumbnail = req.file.thumbnailImage;
+        const thumbnail = req.files?.thumbnailImage;
 
         // now validation if all the data sent or not
         if (!courseName || !courseDescription || !whatYouWillLearn || !tag || !thumbnail) {
@@ -27,11 +27,11 @@ exports.createCourse = async (req, res) => {
             });
         }
 
-        // now validation if the Instructor for the Given ID exits or not
-        // during validation in auth middleWare we have inserted the user in the Reqeust URL
-        const userID = req.user.id;
-        // this userId and InstructorID i think they are same
-        const instructorDetails = await User.findById(userID);
+        // now validation if the Instructor for the Given ID exists or not
+        // during validation in auth middleware we have inserted the user in the request URL
+        const userId = req.user.id;
+        // this userId and instructorId are the same
+        const instructorDetails = await User.findById(userId);
         if (!instructorDetails) {
             return res.status(404).json({
                 success: false,
@@ -39,8 +39,8 @@ exports.createCourse = async (req, res) => {
             });
         }
 
-        // validate if the tag exits or not
-        const tagDetails = await Tags.findById(tag);
+        // validate if the tag exists or not
+        const tagDetails = await Category.findById(tag);
         if (!tagDetails) {
             return res.status(404).json({
                 success: false,
@@ -49,7 +49,7 @@ exports.createCourse = async (req, res) => {
         }
 
         // now upload the thumbnail image to Cloudinary
-        const thumbnailImage = await uploadImageToCloudinary(thumbnail, process.env.FOLDER_NAME);
+        const thumbnailImage = await uploadImageTocloudinary(thumbnail, process.env.FOLDER_NAME);
         if (!thumbnailImage) {
             return res.status(500).json({
                 success: false,
@@ -105,7 +105,7 @@ exports.createCourse = async (req, res) => {
 
 
 // get all the course
-exports.showAllCourses = async (req, res) => {
+exports.getAllCourses = async (req, res) => {
     try {
         // fetch all the course from the DB
         // here {} means we are not applying any filter
@@ -136,7 +136,7 @@ exports.showAllCourses = async (req, res) => {
 }
 
 //handler for getCourse Details
-exports.showCourseDetails = async (req, res) => {
+exports.getCourseDetails = async (req, res) => {
     try {
 
         // fetch the CourseId from the request body

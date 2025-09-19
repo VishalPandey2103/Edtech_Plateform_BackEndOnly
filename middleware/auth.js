@@ -73,7 +73,7 @@ exports.isStudent = async (req, res, next) => {
 }
 
 // instructor
-exports.isInstrutor = async (req, res, next) => {
+exports.isInstructor = async (req, res, next) => {
     try {
 
         // role has been inserted in the user req URL through auth middleware

@@ -1,65 +1,65 @@
 const User = require("../models/User");
 const OTP = require("../models/OTP");
-const otpGenrator = require("otp-genrator");
+const otpGenerator = require("otp-genrator");
 const bcrypt = require("bcrypt");
 const { signedCookie } = require("cookie-parser");
 
 
-// send otp
-exports.sendOTP = async (req,res) => {
+// send OTP
+exports.sendOTP = async (req, res) => {
     try{
         // fetch email from the request body
         const {email} = req.body;
 
-        // check if the user already exits with the current email
-        const checkUserPresent = await User.findOne({email});
+    // check if the user already exists with the current email
+    const checkUserPresent = await User.findOne({ email });
 
-        // if the user already present in the DB then sendthe response
-        if(checkUserPresent){
+        // if the user already present in the DB then send the response
+        if (checkUserPresent) {
             return res.status(401).json({
-                success:false,
-                message:"User Already registered",
-            })
+                success: false,
+                message: "User already registered",
+            });
         }
 
-        // else if user not exits, gnerate the OTP for verification
+        // else if user not exists, generate the OTP for verification
         // six is the length of OTP
-        // along with length we need to pass the Options as object in gnerate function
-        var otp = otpGenrator.generate(6,{
-            upperCaseAlphabets:false,
-            lowerCaseAlphabets:false,
-            specialChars:false,
-        })
+        // along with length we need to pass the Options as object in generate function
+        var otp = otpGenerator.generate(6, {
+            upperCaseAlphabets: false,
+            lowerCaseAlphabets: false,
+            specialChars: false,
+        });
 
         console.log("OTP Generated : ",otp);
 
-        // verify if the OTP genrated is unique or not
-        let result = await OTP.findOne({otp:otp});
+    // verify if the OTP generated is unique or not
+    let result = await OTP.findOne({ otp: otp });
 
-        // till u dont get the unique OTP,keep genrating and verifying it
-        // it is bad method of OTP gneration
-        // library exits for gnerating the unique OTP
-        while(result){
-            otp = otpGenrator.generate(6,{
-            upperCaseAlphabets:false,
-            lowerCaseAlphabets:false,
-            specialChars:false,
-            })
-            result = await OTP.findOne({otp:otp});
+        // till you don't get the unique OTP, keep generating and verifying it
+        // it is a bad method of OTP generation
+        // library exists for generating the unique OTP
+        while (result) {
+            otp = otpGenerator.generate(6, {
+                upperCaseAlphabets: false,
+                lowerCaseAlphabets: false,
+                specialChars: false,
+            });
+            result = await OTP.findOne({ otp: otp });
         }
 
-        // make the entry of OTP into dataBase
-        const otpPayload = {email,otp};
-        const otpBody = await OTP.create(otpPayload);
+    // make the entry of OTP into database
+    const otpPayload = { email, otp };
+    const otpBody = await OTP.create(otpPayload);
 
         console.log(otpBody);
 
-        // return the response that OTP has been gnerated
+        // return the response that OTP has been generated
         res.status(200).json({
-            success:true,
-            message:"OTP sent SuccessFully",
+            success: true,
+            message: "OTP sent Successfully",
             otp,
-        })
+        });
 
     }
     catch(error){
