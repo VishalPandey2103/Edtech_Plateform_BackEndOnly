@@ -2,9 +2,6 @@ const jwt = require("jsonwebtoken")
 require("dotenv").config()
 const User = require("../models/User")
 
-// auth
-// ordering of middleware are defined in routes
-// best way to get token bearer method , worst method body
 exports.auth = async (req, res, next) => {
     try {
 
